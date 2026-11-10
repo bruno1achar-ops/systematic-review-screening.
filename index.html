@@ -1,0 +1,818 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReviewScreen | Title & Abstract Screening</title>
+<style>
+:root{
+  --bg:#f5f6f4;--card:#fff;--ink:#202b27;--muted:#69766f;
+  --line:#dfe5e0;--green:#245c46;--pale:#e8f2ec;
+  --red:#a63838;--amber:#96651a;--shadow:0 5px 22px #20392b0b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:#173c30;color:white;padding:23px max(20px,calc((100% - 1400px)/2))}
+header h1{margin:0;font-size:25px;letter-spacing:-.5px}
+header p{margin:5px 0 0;color:#d6e5db}
+main{max-width:1400px;margin:24px auto;padding:0 18px 50px}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+button,.button{border:1px solid var(--line);background:white;color:var(--ink);
+  padding:9px 13px;border-radius:8px;cursor:pointer;font:inherit;font-weight:600}
+button:hover,.button:hover{filter:brightness(.97)}
+button.primary{background:var(--green);color:white;border-color:var(--green)}
+button.danger{color:var(--red)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:13px;
+  padding:20px;margin-bottom:18px;box-shadow:var(--shadow)}
+h2{font-size:18px;margin:0 0 14px}
+h3{font-size:15px;margin:18px 0 8px}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.stat{background:white;border:1px solid var(--line);border-radius:11px;padding:15px}
+.stat strong{font-size:26px;display:block}
+.stat span{font-size:12px;color:var(--muted)}
+label{display:block;font-weight:600;margin-bottom:5px}
+input,textarea,select{width:100%;border:1px solid #cfd8d1;border-radius:7px;
+  padding:10px;background:white;color:var(--ink);font:inherit}
+textarea{resize:vertical;min-height:65px}
+input:focus,textarea:focus,select:focus{outline:2px solid #b3d4c0;border-color:var(--green)}
+.field{min-width:0}
+.field .hint{font-size:12px;color:var(--muted);margin-top:4px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.notice{background:#fff7e6;border:1px solid #ead8aa;padding:12px;border-radius:8px;margin:12px 0}
+.success{background:var(--pale);padding:12px;border-radius:8px;margin:12px 0}
+.hidden{display:none!important}
+.filebox{border:1px dashed #aabbb0;border-radius:9px;padding:16px}
+.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar input{flex:1;min-width:180px}
+.toolbar select{width:auto;max-width:220px}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:9px}
+table{width:100%;border-collapse:collapse;background:white;min-width:1000px}
+th,td{text-align:left;vertical-align:top;padding:11px;border-bottom:1px solid var(--line)}
+th{background:#f0f4f0;font-size:12px;position:sticky;top:0;z-index:1}
+td{max-width:360px;overflow-wrap:anywhere}
+td .recordtitle{font-weight:700;margin-bottom:5px}
+td .abstract{color:var(--muted);font-size:12px;max-width:390px}
+td select{min-width:125px;padding:7px}
+td input{min-width:150px;padding:7px}
+.badge{display:inline-block;border-radius:20px;padding:3px 8px;font-size:11px;font-weight:700}
+.b-include{background:#dff2e5;color:#205c37}
+.b-exclude{background:#fbe6e5;color:#96332e}
+.b-maybe{background:#fff0d2;color:#865d13}
+.b-duplicate{background:#e8e8f7;color:#514d8b}
+.reason{font-size:12px;max-width:300px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px}
+@media(max-width:760px){
+ .grid,.stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ header{padding:20px}
+ main{padding:0 10px}
+ .panel{padding:14px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>ReviewScreen</h1>
+  <p>Systematic Review · Title & Abstract Screening</p>
+</header>
+
+<main>
+  <div class="notice">
+    <strong>Research integrity:</strong> This is a rule-based screening assistant,
+    not an AI model. Keyword matches cannot reliably establish scientific eligibility.
+    Verify every decision manually. Missing keywords do not prove ineligibility.
+    Keep an independent backup of your project.
+  </div>
+
+  <nav>
+    <button class="primary" data-tab="project">1. Project & Criteria</button>
+    <button data-tab="records">2. Screen Records</button>
+    <button data-tab="audit">3. Audit History</button>
+    <button data-tab="backup">4. Backup & Export</button>
+  </nav>
+
+  <section id="tab-project">
+    <div class="panel">
+      <h2>Project details</h2>
+      <div class="grid">
+        <div class="field">
+          <label for="projectName">Review title</label>
+          <input id="projectName" placeholder="Enter your systematic review title">
+        </div>
+        <div class="field">
+          <label for="reviewer">Reviewer name / initials</label>
+          <input id="reviewer" placeholder="e.g. Reviewer 1">
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Eligibility criteria</h2>
+      <p class="muted">Enter alternative keywords separated by commas or new lines.
+      Use common synonyms and abbreviations. Leave a field empty if it is not applicable.
+      These are matching hints, not a substitute for your protocol.</p>
+      <div class="grid">
+        <div class="field">
+          <label for="population">Population</label>
+          <textarea id="population" placeholder="e.g. adults, patients, women"></textarea>
+          <div class="hint">Who is eligible?</div>
+        </div>
+        <div class="field">
+          <label for="intervention">Intervention / exposure / index test</label>
+          <textarea id="intervention" placeholder="e.g. misoprostol, cervical ripening"></textarea>
+          <div class="hint">What is being investigated?</div>
+        </div>
+        <div class="field">
+          <label for="comparator">Comparator</label>
+          <textarea id="comparator" placeholder="e.g. balloon catheter, placebo"></textarea>
+          <div class="hint">Optional if no comparator is required.</div>
+        </div>
+        <div class="field">
+          <label for="outcomes">Outcomes</label>
+          <textarea id="outcomes" placeholder="e.g. vaginal delivery, cesarean delivery"></textarea>
+          <div class="hint">Relevant outcomes or outcome concepts.</div>
+        </div>
+        <div class="field">
+          <label for="designs">Eligible study designs</label>
+          <textarea id="designs" placeholder="e.g. randomized trial, cohort study"></textarea>
+        </div>
+        <div class="field">
+          <label for="must">Other required concepts</label>
+          <textarea id="must" placeholder="e.g. induction of labor"></textarea>
+          <div class="hint">Optional concepts that should appear in eligible records.</div>
+        </div>
+        <div class="field">
+          <label for="exclude">Explicit exclusion indicators</label>
+          <textarea id="exclude" placeholder="e.g. animal study, in vitro, case report"></textarea>
+          <div class="hint">Use only clear exclusions from your protocol. A match triggers an exclusion recommendation.</div>
+        </div>
+        <div class="field">
+          <label for="include">Additional inclusion indicators</label>
+          <textarea id="include" placeholder="e.g. clinical study, human participants"></textarea>
+          <div class="hint">Optional supporting terms, not mandatory unless entered under required concepts.</div>
+        </div>
+      </div>
+      <div class="notice">
+        <strong>How matching works:</strong> Explicit exclusion indicators trigger
+        an Exclude recommendation. If required concepts are missing, the record
+        is marked Maybe rather than automatically discarded. If all entered
+        required concept groups match, the recommendation is Include.
+        Comparator and outcome keywords are treated as supporting evidence, not
+        hard requirements, to reduce inappropriate exclusions.
+      </div>
+      <div class="actions">
+        <button class="primary" id="saveCriteria">Save criteria</button>
+        <button id="runScreen">Run / rerun rule-based screening</button>
+        <button id="example">Load example criteria</button>
+      </div>
+      <p class="muted small" id="criteriaStatus" aria-live="polite"></p>
+    </div>
+
+    <div class="panel">
+      <h2>Import records</h2>
+      <p>Upload CSV or RIS files exported from your reference manager or bibliographic database.</p>
+      <div class="filebox">
+        <label for="fileInput">Choose CSV or RIS file(s)</label>
+        <input id="fileInput" type="file" accept=".csv,.ris,.txt" multiple>
+        <p class="muted small">CSV headers are detected automatically where possible.
+        RIS uses tags such as TY, TI, AB, AU, PY, DO and ID.</p>
+        <div class="actions">
+          <button class="primary" id="importBtn">Import selected files</button>
+          <button id="downloadTemplate">Download CSV template</button>
+        </div>
+      </div>
+      <div id="importStatus" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section id="tab-records" class="hidden">
+    <div class="stats" id="stats"></div>
+    <div class="panel">
+      <h2>Screening workspace</h2>
+      <div class="toolbar">
+        <input id="search" placeholder="Search title, abstract, author, DOI…">
+        <select id="decisionFilter">
+          <option value="all">All decisions</option>
+          <option value="Include">Include</option>
+          <option value="Exclude">Exclude</option>
+          <option value="Maybe">Maybe / unclear</option>
+          <option value="Unscreened">Unscreened</option>
+          <option value="Duplicates">Likely duplicates</option>
+        </select>
+        <select id="sortBy">
+          <option value="import">Import order</option>
+          <option value="title">Title A–Z</option>
+          <option value="year">Year</option>
+          <option value="decision">Decision</option>
+        </select>
+      </div>
+      <div class="actions" style="margin-bottom:12px">
+        <button id="rescreen">Rerun rules on all records</button>
+        <button id="exportVisible">Export visible records</button>
+        <button id="showAll">Show all records</button>
+      </div>
+      <p class="muted small" id="recordCount"></p>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Record</th><th>Year / DOI</th><th>Rule recommendation</th>
+              <th>Final decision</th><th>Reason / evidence</th><th>Reviewer notes</th>
+            </tr>
+          </thead>
+          <tbody id="recordRows"></tbody>
+        </table>
+      </div>
+      <div class="actions" style="margin-top:12px">
+        <button id="prevPage">Previous</button>
+        <span id="pageInfo" class="muted small"></span>
+        <button id="nextPage">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-audit" class="hidden">
+    <div class="panel">
+      <h2>Screening audit history</h2>
+      <p class="muted">Changes made in this browser are recorded with timestamps,
+      old and new values, and the active reviewer. This is a basic local audit log,
+      not a tamper-proof or independently validated audit trail.</p>
+      <div class="actions" style="margin-bottom:12px">
+        <button class="primary" id="exportAudit">Export audit CSV</button>
+        <button id="clearAudit" class="danger">Clear audit history</button>
+      </div>
+      <div class="tablewrap">
+        <table style="min-width:750px">
+          <thead><tr><th>Time</th><th>Reviewer</th><th>Record</th><th>Action</th><th>Change</th></tr></thead>
+          <tbody id="auditRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-backup" class="hidden">
+    <div class="panel">
+      <h2>Backup & export</h2>
+      <p>Download a complete project backup to preserve criteria, records,
+      decisions, notes, duplicate flags and audit history.</p>
+      <div class="actions">
+        <button class="primary" id="backup">Download full project backup (.json)</button>
+        <button id="restoreBtn">Restore project backup (.json)</button>
+        <input type="file" id="restoreInput" accept=".json" class="hidden">
+        <button id="exportAll">Export all screening results (.csv)</button>
+        <button id="exportRIS">Export citations (.ris)</button>
+      </div>
+      <div class="notice">
+        Backups may contain unpublished research, reviewer notes and bibliographic
+        data. Store them securely. Local browser storage can be deleted by browser
+        cleanup, private-browsing sessions, device failure or storage limits.
+      </div>
+      <h3>Storage status</h3>
+      <p id="storageStatus" class="muted"></p>
+      <h3>Danger zone</h3>
+      <p class="muted">This permanently removes the project stored in this browser.
+      Download a backup first.</p>
+      <button id="resetProject" class="danger">Delete local project</button>
+    </div>
+  </section>
+
+  <footer>ReviewScreen · Local-first screening assistant · Human verification required</footer>
+</main>
+
+<script>
+"use strict";
+
+const STORAGE_KEY = "reviewscreen_project_v1";
+const FIELDS = ["population","intervention","comparator","outcomes",
+                "designs","must","exclude","include"];
+const FIELD_LABELS = {
+  population:"Population",
+  intervention:"Intervention / exposure / index test",
+  comparator:"Comparator",
+  outcomes:"Outcomes",
+  designs:"Study design",
+  must:"Other required concepts",
+  exclude:"Explicit exclusion indicator",
+  include:"Additional inclusion indicator"
+};
+const $ = id => document.getElementById(id);
+const uid = () => "r_" + Date.now().toString(36) + "_" +
+  Math.random().toString(36).slice(2,8);
+const now = () => new Date().toISOString();
+
+let project = freshProject();
+let currentPage = 0;
+const PAGE_SIZE = 25;
+
+function freshProject(){
+  return {
+    version:1,
+    name:"",
+    reviewer:"",
+    criteria:Object.fromEntries(FIELDS.map(k=>[k,""])),
+    records:[],
+    audit:[],
+    createdAt:now(),
+    updatedAt:now()
+  };
+}
+function save(){
+  project.updatedAt=now();
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(project));
+    $("storageStatus").textContent =
+      `${project.records.length} records · Last saved ${new Date(project.updatedAt).toLocaleString()}`;
+    return true;
+  }catch(e){
+    alert("Could not save to browser storage. Export a backup immediately. " + e.message);
+    return false;
+  }
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const p=JSON.parse(raw);
+      if(p && p.version===1 && Array.isArray(p.records)){
+        project={...freshProject(),...p};
+        project.criteria={...Object.fromEntries(FIELDS.map(k=>[k,""])),...(p.criteria||{})};
+        project.audit=Array.isArray(p.audit)?p.audit:[];
+      }
+    }
+  }catch(e){console.error(e);}
+  renderProject();
+  renderAll();
+}
+function escapeHTML(s){
+  return String(s??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+function logAction(record,action,oldValue,newValue){
+  project.audit.unshift({
+    time:now(), reviewer:project.reviewer||"",
+    recordId:record?.id||"",
+    title:record?.title||"",
+    action,oldValue:String(oldValue??""),newValue:String(newValue??"")
+  });
+  if(project.audit.length>10000)project.audit.length=10000;
+}
+function renderProject(){
+  $("projectName").value=project.name||"";
+  $("reviewer").value=project.reviewer||"";
+  FIELDS.forEach(k=>$(k).value=project.criteria[k]||"");
+}
+function readCriteria(){
+  project.name=$("projectName").value.trim();
+  project.reviewer=$("reviewer").value.trim();
+  FIELDS.forEach(k=>project.criteria[k]=$(k).value.trim());
+}
+function saveCriteria(){
+  readCriteria();
+  save();
+  $("criteriaStatus").textContent="Criteria saved locally at "+new Date().toLocaleTimeString()+".";
+}
+function terms(value){
+  return String(value||"").split(/[,\n;\r]+/).map(s=>s.trim()).filter(Boolean);
+}
+function normalize(s){
+  return String(s||"").toLowerCase()
+    .normalize("NFKD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
+}
+function termMatches(text,term){
+  const t=normalize(term), hay=normalize(text);
+  if(!t || !hay)return false;
+  // Phrase match; short single words use word boundaries to reduce false positives.
+  if(t.includes(" "))return (" "+hay+" ").includes(" "+t+" ");
+  return (" "+hay+" ").includes(" "+t+" ");
+}
+function matchedTerms(text,list){
+  return list.filter(term=>termMatches(text,term));
+}
+function screenRecord(r){
+  const text=[r.title,r.abstract,r.keywords,r.journal].filter(Boolean).join(" ");
+  const c=project.criteria;
+  const reasons=[];
+  const exclusionHits=matchedTerms(text,terms(c.exclude));
+  if(exclusionHits.length){
+    reasons.push("Explicit exclusion indicator matched: "+exclusionHits.join(", "));
+    return {recommendation:"Exclude",reason:reasons.join("; "),matched:exclusionHits};
+  }
+  const requiredGroups=["population","intervention","must"];
+  const missing=[];
+  requiredGroups.forEach(key=>{
+    const list=terms(c[key]);
+    if(list.length && !matchedTerms(text,list).length)missing.push(key);
+  });
+  if(!r.title || !String(r.title).trim()){
+    reasons.push("Title is missing; manual assessment required.");
+    return {recommendation:"Maybe",reason:reasons.join(" "),matched:[]};
+  }
+  if(!r.abstract || !String(r.abstract).trim()){
+    reasons.push("Abstract is missing; title alone is insufficient for reliable exclusion.");
+    return {recommendation:"Maybe",reason:reasons.join(" "),matched:[]};
+  }
+  if(missing.length){
+    reasons.push("No configured keyword matched: "+missing.map(k=>FIELD_LABELS[k]).join(", "));
+    reasons.push("Absence of a keyword does not establish ineligibility.");
+    return {recommendation:"Maybe",reason:reasons.join(" "),matched:[]};
+  }
+  const hits=[];
+  ["population","intervention","comparator","outcomes","designs","must","include"].forEach(key=>{
+    const found=matchedTerms(text,terms(c[key]));
+    if(found.length)hits.push(FIELD_LABELS[key]+": "+found.join(", "));
+  });
+  reasons.push("All configured required keyword groups matched.");
+  if(hits.length)reasons.push("Supporting matches: "+hits.join(" | "));
+  else reasons.push("No optional supporting terms were configured.");
+  reasons.push("Verify the full eligibility criteria manually.");
+  return {recommendation:"Include",reason:reasons.join(" "),matched:hits};
+}
+function applyScreening(r){
+  const result=screenRecord(r);
+  const previous=r.recommendation||"";
+  r.recommendation=result.recommendation;
+  r.reason=result.reason;
+  r.matched=result.matched;
+  r.screenedAt=now();
+  // Never overwrite a human's existing final decision.
+  if(!r.manualDecision)r.decision=result.recommendation;
+  logAction(r,"Rule screening",previous,result.recommendation);
+}
+function normalizeDOI(s){
+  return String(s||"").trim().toLowerCase()
+    .replace(/^https?:\/\/(dx\.)?doi\.org\//,"")
+    .replace(/^doi:\s*/,"").replace(/[.,;]+$/,"");
+}
+function findDuplicates(){
+  const doiSeen=new Map(),titleSeen=new Map();
+  project.records.forEach(r=>{
+    r.duplicateOf="";
+    const doi=normalizeDOI(r.doi);
+    const title=normalize(r.title);
+    if(doi){
+      if(doiSeen.has(doi))r.duplicateOf=doiSeen.get(doi);
+      else doiSeen.set(doi,r.id);
+    }
+    if(!r.duplicateOf && title.length>=20){
+      if(titleSeen.has(title))r.duplicateOf=titleSeen.get(title);
+      else titleSeen.set(title,r.id);
+    }
+  });
+}
+function splitAuthors(s){
+  return String(s||"").split(/\s*(?:;|\|)\s*/).filter(Boolean);
+}
+function makeRecord(obj,source){
+  const title=obj.title||obj.TI||obj.T1||obj["article title"]||obj["document title"]||"";
+  const abstract=obj.abstract||obj.AB||obj["abstract"]||obj.description||"";
+  const authors=obj.authors||obj.author||obj.AU||obj["authors"]||"";
+  const doi=normalizeDOI(obj.doi||obj.DO||obj["doi"]||obj["digital object identifier"]||"");
+  const yearRaw=obj.year||obj.PY||obj.Y1||obj["publication year"]||obj.date||"";
+  const yearMatch=String(yearRaw).match(/\b(19|20)\d{2}\b/);
+  return {
+    id:uid(),title:String(title).trim(),abstract:String(abstract).trim(),
+    authors:Array.isArray(authors)?authors.join("; "):String(authors||"").trim(),
+    year:yearMatch?yearMatch[0]:"",
+    doi,
+    journal:String(obj.journal||obj.JO||obj.JF||obj.T2||obj["source title"]||"").trim(),
+    keywords:String(obj.keywords||obj.KW||obj["author keywords"]||"").trim(),
+    url:String(obj.url||obj.UR||obj["url"]||"").trim(),
+    source:source||"Imported",
+    recommendation:"Unscreened",decision:"Unscreened",manualDecision:false,
+    reason:"Not screened yet.",notes:"",duplicateOf:"",screenedAt:"",importedAt:now()
+  };
+}
+function parseCSV(text){
+  // RFC4180-style quoted fields, escaped quotes and embedded newlines.
+  const rows=[];let row=[],cell="",quoted=false;
+  text=text.replace(/^\uFEFF/,"");
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(quoted){
+      if(ch==='"'&&text[i+1]==='"'){cell+='"';i++;}
+      else if(ch==='"')quoted=false;
+      else cell+=ch;
+    }else{
+      if(ch==='"'&&cell==="")quoted=true;
+      else if(ch===","){row.push(cell);cell="";}
+      else if(ch==="\n"){row.push(cell);rows.push(row);row=[];cell="";}
+      else if(ch==="\r"){if(text[i+1]==="\n")i++;row.push(cell);rows.push(row);row=[];cell="";}
+      else cell+=ch;
+    }
+  }
+  if(cell!==""||row.length){row.push(cell);rows.push(row);}
+  if(!rows.length)return [];
+  const headers=rows.shift().map(h=>normalize(h).replace(/\s/g," "));
+  return rows.filter(r=>r.some(x=>String(x).trim())).map(cells=>{
+    const o={};
+    headers.forEach((h,i)=>{o[h]=cells[i]||"";});
+    return o;
+  });
+}
+function parseRIS(text){
+  const records=[];let current=null;
+  const start=()=>({});const push=()=>{if(current){records.push(current);current=null;}};
+  text.replace(/^\uFEFF/,"").split(/\r?\n/).forEach(line=>{
+    const m=line.match(/^([A-Z0-9]{2})\s*-\s?(.*)$/);
+    if(!m)return;
+    const tag=m[1],value=m[2].trim();
+    if(tag==="TY"){push();current=start();current.TY=value;return;}
+    if(!current)current=start();
+    if(tag==="ER"){push();return;}
+    if(tag==="AU"||tag==="A1"||tag==="KW"){
+      current[tag]=(current[tag]?current[tag]+"; ":"")+value;
+    }else if(["TI","T1","AB","N2","PY","Y1","DO","ID","JO","JF","T2","UR","PB"].includes(tag)){
+      current[tag]=(current[tag]?current[tag]+" ":"")+value;
+    }
+  });
+  push();
+  return records;
+}
+function importObjects(objects,source){
+  let added=0,skipped=0;
+  const existingDOI=new Set(project.records.map(r=>normalizeDOI(r.doi)).filter(Boolean));
+  const existingTitles=new Set(project.records.map(r=>normalize(r.title)).filter(Boolean));
+  objects.forEach(o=>{
+    const r=makeRecord(o,source);
+    if(!r.title){skipped++;return;}
+    const d=normalizeDOI(r.doi),t=normalize(r.title);
+    // Avoid silently dropping duplicates: import them and flag for review.
+    if(d&&existingDOI.has(d))r.possibleDuplicateOnImport=true;
+    else if(t&&existingTitles.has(t))r.possibleDuplicateOnImport=true;
+    project.records.push(r);added++;
+    if(d)existingDOI.add(d);
+    if(t)existingTitles.add(t);
+    logAction(r,"Imported","",source);
+  });
+  findDuplicates();save();renderAll();
+  return {added,skipped};
+}
+async function importFiles(){
+  const files=[...$("fileInput").files];
+  if(!files.length){alert("Choose a CSV or RIS file first.");return;}
+  let total=0,skipped=0,errors=[];
+  for(const file of files){
+    try{
+      const text=await file.text();
+      const ext=file.name.toLowerCase().split(".").pop();
+      let objs;
+      if(ext==="ris"||(/^\s*TY\s*-/m.test(text)&&/^\s*ER\s*-/m.test(text))){
+        objs=parseRIS(text);
+      }else if(ext==="csv"||ext==="txt"){
+        objs=parseCSV(text);
+      }else{errors.push(file.name+": unsupported format");continue;}
+      const result=importObjects(objs,file.name);
+      total+=result.added;skipped+=result.skipped;
+    }catch(e){errors.push(file.name+": "+e.message);}
+  }
+  $("importStatus").innerHTML=
+    `<div class="success">Imported ${total} records. Skipped ${skipped} rows without a title.`+
+    (errors.length?`<br>Issues: ${escapeHTML(errors.join("; "))}`:"")+"</div>";
+  $("fileInput").value="";
+}
+function badge(decision){
+  const cls=decision==="Include"?"b-include":decision==="Exclude"?"b-exclude":
+    decision==="Maybe"?"b-maybe":"";
+  return `<span class="badge ${cls}">${escapeHTML(decision||"Unscreened")}</span>`;
+}
+function renderStats(){
+  const n=project.records.length;
+  const count=d=>project.records.filter(r=>r.decision===d).length;
+  const dup=project.records.filter(r=>r.duplicateOf).length;
+  $("stats").innerHTML=[
+    ["Total records",n],["Include",count("Include")],["Exclude",count("Exclude")],
+    ["Maybe",count("Maybe")],["Likely duplicates",dup]
+  ].map(([label,value])=>`<div class="stat"><strong>${value}</strong><span>${label}</span></div>`).join("");
+}
+function filteredRecords(){
+  const q=normalize($("search").value);
+  const f=$("decisionFilter").value;
+  let list=project.records.filter(r=>{
+    const hay=normalize([r.title,r.abstract,r.authors,r.doi,r.journal,r.notes].join(" "));
+    if(q&&!hay.includes(q))return false;
+    if(f==="Duplicates"&&!r.duplicateOf)return false;
+    if(["Include","Exclude","Maybe"].includes(f)&&r.decision!==f)return false;
+    if(f==="Unscreened"&&r.decision!=="Unscreened")return false;
+    return true;
+  });
+  const sort=$("sortBy").value;
+  if(sort==="title")list.sort((a,b)=>a.title.localeCompare(b.title));
+  if(sort==="year")list.sort((a,b)=>(b.year||"").localeCompare(a.year||""));
+  if(sort==="decision")list.sort((a,b)=>(a.decision||"").localeCompare(b.decision||""));
+  return list;
+}
+function renderRecords(){
+  renderStats();
+  const list=filteredRecords();
+  const pages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));
+  currentPage=Math.min(currentPage,pages-1);
+  const page=list.slice(currentPage*PAGE_SIZE,(currentPage+1)*PAGE_SIZE);
+  $("recordCount").textContent=`Showing ${page.length} of ${list.length} matching records (${project.records.length} total).`;
+  $("pageInfo").textContent=`Page ${currentPage+1} of ${pages}`;
+  $("prevPage").disabled=currentPage===0;
+  $("nextPage").disabled=currentPage>=pages-1;
+  $("recordRows").innerHTML=page.map(r=>`
+    <tr>
+      <td>
+        <div class="recordtitle">${escapeHTML(r.title||"Untitled record")}</div>
+        <div class="abstract">${escapeHTML((r.abstract||"No abstract available").slice(0,600))}${(r.abstract||"").length>600?"…":""}</div>
+        <div class="muted small">${escapeHTML(r.authors)}${r.journal?" · "+escapeHTML(r.journal):""}</div>
+        ${r.duplicateOf?`<div style="margin-top:5px"><span class="badge b-duplicate">Likely duplicate</span>
+        <button data-open="${escapeHTML(r.duplicateOf)}">View original</button></div>`:""}
+      </td>
+      <td>${escapeHTML(r.year)}<br><span class="small">${escapeHTML(r.doi)}</span>
+      ${r.url?`<br><a href="${escapeHTML(r.url)}" target="_blank" rel="noopener">Open source</a>`:""}</td>
+      <td>${badge(r.recommendation)}<div class="small muted">${r.screenedAt?escapeHTML(new Date(r.screenedAt).toLocaleDateString()):"Not screened"}</div></td>
+      <td>
+        <select data-decision="${escapeHTML(r.id)}" aria-label="Final decision">
+          ${["Unscreened","Include","Exclude","Maybe"].map(d=>`<option ${r.decision===d?"selected":""}>${d}</option>`).join("")}
+        </select>
+        <div class="small muted">${r.manualDecision?"Manually overridden":"Rule-based recommendation"}</div>
+      </td>
+      <td><div class="reason">${escapeHTML(r.reason||"No reason recorded")}</div></td>
+      <td><input data-notes="${escapeHTML(r.id)}" value="${escapeHTML(r.notes)}" placeholder="Reviewer notes" aria-label="Reviewer notes">
+      <div class="small muted">${r.duplicateOf?"Check duplicate before finalizing":""}</div></td>
+    </tr>`).join("")||`<tr><td colspan="6">No records match these filters.</td></tr>`;
+}
+function renderAudit(){
+  $("auditRows").innerHTML=project.audit.slice(0,2000).map(a=>`
+    <tr><td>${escapeHTML(new Date(a.time).toLocaleString())}</td>
+    <td>${escapeHTML(a.reviewer)}</td><td>${escapeHTML(a.title||a.recordId)}</td>
+    <td>${escapeHTML(a.action)}</td>
+    <td><div><strong>From:</strong> ${escapeHTML(a.oldValue)}</div>
+    <div><strong>To:</strong> ${escapeHTML(a.newValue)}</div></td></tr>`).join("")||
+    `<tr><td colspan="5">No audit entries yet.</td></tr>`;
+}
+function renderAll(){
+  renderRecords();renderAudit();
+  $("storageStatus").textContent=
+    `${project.records.length} records · Last saved ${new Date(project.updatedAt).toLocaleString()}`;
+}
+function switchTab(name){
+  ["project","records","audit","backup"].forEach(t=>$("tab-"+t).classList.toggle("hidden",t!==name));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("primary",b.dataset.tab===name));
+  if(name==="records")renderRecords();
+  if(name==="audit")renderAudit();
+}
+function runAll(){
+  saveCriteria();
+  project.records.forEach(r=>applyScreening(r));
+  findDuplicates();save();renderAll();
+  $("criteriaStatus").textContent=`Screened ${project.records.length} records using the current rules. Verify recommendations manually.`;
+}
+function csvCell(v){
+  const s=String(v??"");
+  return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;
+}
+function download(filename,content,type="text/plain;charset=utf-8"){
+  const blob=new Blob(["\uFEFF",content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportCSV(records){
+  const headers=["title","abstract","authors","year","doi","journal","keywords","url",
+    "source","recommendation","final_decision","manual_override","reason","reviewer_notes",
+    "duplicate_of_title","screened_at","imported_at"];
+  const rows=records.map(r=>[
+    r.title,r.abstract,r.authors,r.year,r.doi,r.journal,r.keywords,r.url,r.source,
+    r.recommendation,r.decision,r.manualDecision?"Yes":"No",r.reason,r.notes,
+    project.records.find(x=>x.id===r.duplicateOf)?.title||"",r.screenedAt,r.importedAt
+  ]);
+  download("reviewscreen_results.csv",[headers,...rows].map(row=>row.map(csvCell).join(",")).join("\r\n"),
+    "text/csv;charset=utf-8");
+}
+function exportRIS(){
+  const out=project.records.map(r=>{
+    const lines=["TY  - JOUR"];
+    if(r.title)lines.push("TI  - "+r.title);
+    if(r.abstract)lines.push("AB  - "+r.abstract.replace(/\r?\n/g," "));
+    splitAuthors(r.authors).forEach(a=>lines.push("AU  - "+a));
+    if(r.year)lines.push("PY  - "+r.year);
+    if(r.doi)lines.push("DO  - "+r.doi);
+    if(r.journal)lines.push("JO  - "+r.journal);
+    if(r.url)lines.push("UR  - "+r.url);
+    lines.push("N1  - ReviewScreen decision: "+r.decision);
+    lines.push("ER  - ","");
+    return lines.join("\r\n");
+  }).join("\r\n");
+  download("reviewscreen_citations.ris",out);
+}
+function downloadBackup(){
+  download("reviewscreen_backup.json",JSON.stringify(project,null,2),"application/json");
+}
+function exportAudit(){
+  const headers=["time","reviewer","record_id","title","action","old_value","new_value"];
+  download("reviewscreen_audit.csv",[headers,...project.audit.map(a=>[
+    a.time,a.reviewer,a.recordId,a.title,a.action,a.oldValue,a.newValue
+  ])].map(row=>row.map(csvCell).join(",")).join("\r\n"),"text/csv;charset=utf-8");
+}
+function setDecision(id,value){
+  const r=project.records.find(x=>x.id===id);if(!r)return;
+  const old=r.decision;
+  r.decision=value;r.manualDecision=value!==r.recommendation;
+  logAction(r,"Final decision",old,value);
+  save();renderRecords();renderAudit();
+}
+function setNotes(id,value){
+  const r=project.records.find(x=>x.id===id);if(!r)return;
+  const old=r.notes||"";if(old===value)return;
+  r.notes=value;logAction(r,"Reviewer notes",old,value);save();
+}
+function loadExample(){
+  const example={
+    population:"adult, adults, patient, patients",
+    intervention:"treatment, intervention",
+    comparator:"control, comparison",
+    outcomes:"outcome, clinical outcome",
+    designs:"randomized, randomised, cohort, trial",
+    must:"clinical",
+    exclude:"animal study, in vitro, case report",
+    include:"human"
+  };
+  FIELDS.forEach(k=>$(k).value=example[k]);
+  saveCriteria();
+}
+function downloadTemplate(){
+  const headers=["Title","Abstract","Authors","Year","DOI","Journal","Keywords","URL"];
+  download("reviewscreen_template.csv",headers.join(",")+"\r\n","text/csv;charset=utf-8");
+}
+
+document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+$("saveCriteria").addEventListener("click",saveCriteria);
+$("runScreen").addEventListener("click",()=>{
+  if(!project.records.length){saveCriteria();alert("Import records first, then run screening.");return;}
+  if(confirm("Run the current rules on all records? Existing manual decisions will be preserved."))runAll();
+});
+$("rescreen").addEventListener("click",()=>{
+  if(confirm("Rerun rules on all records? Existing manual decisions will be preserved."))runAll();
+});
+$("example").addEventListener("click",()=>{
+  if(confirm("Replace the current criteria with example criteria?"))loadExample();
+});
+$("importBtn").addEventListener("click",importFiles);
+$("downloadTemplate").addEventListener("click",downloadTemplate);
+["search","decisionFilter","sortBy"].forEach(id=>$(id).addEventListener(
+  id==="search"?"input":"change",()=>{currentPage=0;renderRecords();}));
+$("prevPage").addEventListener("click",()=>{currentPage=Math.max(0,currentPage-1);renderRecords();});
+$("nextPage").addEventListener("click",()=>{currentPage++;renderRecords();});
+$("showAll").addEventListener("click",()=>{$("search").value="";$("decisionFilter").value="all";currentPage=0;renderRecords();});
+$("exportVisible").addEventListener("click",()=>exportCSV(filteredRecords()));
+$("exportAll").addEventListener("click",()=>exportCSV(project.records));
+$("exportRIS").addEventListener("click",exportRIS);
+$("backup").addEventListener("click",downloadBackup);
+$("exportAudit").addEventListener("click",exportAudit);
+$("restoreBtn").addEventListener("click",()=>$("restoreInput").click());
+$("restoreInput").addEventListener("change",async e=>{
+  const file=e.target.files[0];if(!file)return;
+  try{
+    const p=JSON.parse(await file.text());
+    if(p.version!==1||!Array.isArray(p.records)||!p.criteria)throw new Error("This is not a valid ReviewScreen backup.");
+    if(!confirm("Replace the current local project with this backup? Download a backup of the current project first if needed."))return;
+    project={...freshProject(),...p};
+    project.criteria={...Object.fromEntries(FIELDS.map(k=>[k,""])),...p.criteria};
+    project.audit=Array.isArray(p.audit)?p.audit:[];
+    renderProject();save();renderAll();alert("Backup restored.");
+  }catch(err){alert("Could not restore backup: "+err.message);}
+  finally{e.target.value="";}
+});
+$("clearAudit").addEventListener("click",()=>{
+  if(confirm("Permanently clear the local audit history?")){
+    project.audit=[];save();renderAudit();
+  }
+});
+$("resetProject").addEventListener("click",()=>{
+  if(confirm("Delete ALL records, criteria, notes and audit history from this browser? This cannot be undone.")){
+    localStorage.removeItem(STORAGE_KEY);project=freshProject();currentPage=0;
+    renderProject();renderAll();save();switchTab("project");
+  }
+});
+$("recordRows").addEventListener("change",e=>{
+  const d=e.target.closest("[data-decision]");
+  if(d){setDecision(d.dataset.decision,d.value);return;}
+});
+$("recordRows").addEventListener("click",e=>{
+  const b=e.target.closest("[data-open]");
+  if(b){
+    const r=project.records.find(x=>x.id===b.dataset.open);
+    if(r){$("search").value=r.title;switchTab("records");currentPage=0;renderRecords();}
+  }
+});
+$("recordRows").addEventListener("change",e=>{
+  const n=e.target.closest("[data-notes]");
+  if(n)setNotes(n.dataset.notes,n.value);
+});
+$("projectName").addEventListener("change",saveCriteria);
+$("reviewer").addEventListener("change",saveCriteria);
+load();
+</script>
+</body>
+</html>
